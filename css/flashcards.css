@@ -64,6 +64,7 @@ body {
     cursor: pointer;
     transition: background 0.2s;
 }
+
 .help-btn:hover {
     background: #ff0000;
 }
@@ -113,28 +114,28 @@ body {
     cursor: pointer;
     color: #888;
 }
+
 .close-modal:hover {
     color: #ff0000;
 }
 
-/* Общие стили для кнопок */
+/* Контейнеры кнопок */
 .buttons-container {
     display: flex;
     justify-content: center;
     gap: 15px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
     width: 100%;
     max-width: 800px;
-    margin-bottom: 20px;
-}
-
-.top-buttons {
-    margin-bottom: 20px;
 }
 
 .learning-buttons {
-    margin-top: 10px;
-    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    width: 100%;
 }
 
 .btn {
@@ -147,9 +148,9 @@ body {
     padding: 12px 24px;
     cursor: pointer;
     transition: background-color 0.3s;
-    flex: 1;
-    min-width: 160px;
+    min-width: 180px;
 }
+
 .btn:hover {
     background-color: #b32e2e;
 }
@@ -190,6 +191,7 @@ body {
     transition: transform 0.2s ease;
     cursor: grab;
 }
+
 .flashcard:active {
     cursor: grabbing;
 }
@@ -203,9 +205,11 @@ body {
     transition: background 0.2s;
     z-index: 1;
 }
+
 .flashcard.like::after {
     background: rgba(0, 255, 0, 0.25);
 }
+
 .flashcard.dislike::after {
     background: rgba(255, 0, 0, 0.25);
 }
@@ -219,6 +223,7 @@ body {
     transform-style: preserve-3d;
     border-radius: 10px;
 }
+
 .flipped .flashcard-inner {
     transform: rotateY(180deg);
 }
@@ -234,6 +239,7 @@ body {
     justify-content: center;
     align-items: center;
 }
+
 .flashcard-back {
     position: absolute;
     top: 0;
@@ -250,19 +256,20 @@ body {
     display: block;
 }
 
-/* Анимации свайпа */
+/* Анимация улетания */
 .flashcard.swipe-right {
     transform: translateX(500px) rotate(20deg);
     opacity: 0;
     transition: 0.4s;
 }
+
 .flashcard.swipe-left {
     transform: translateX(-500px) rotate(-20deg);
     opacity: 0;
     transition: 0.4s;
 }
 
-/* Подсказка о свайпе (только мобильные) */
+/* Подсказка */
 .swipe-hint {
     color: white;
     text-align: center;
@@ -272,10 +279,10 @@ body {
     font-size: 0.9rem;
 }
 
-/* Адаптивность */
 .mobile-only {
     display: none;
 }
+
 .desktop-only {
     display: flex;
 }
@@ -283,6 +290,7 @@ body {
 .mobile-buttons {
     display: none;
 }
+
 .mobile-buttons-row {
     display: flex;
     flex-direction: row;
@@ -292,11 +300,11 @@ body {
 }
 
 @media screen and (max-width: 768px) {
-    .desktop-only {
+    .desktop-buttons {
         display: none !important;
     }
-    .mobile-only {
-        display: block;
+    .desktop-only {
+        display: none !important;
     }
     .mobile-buttons {
         display: flex !important;
@@ -305,8 +313,8 @@ body {
         width: 100%;
         margin-top: 10px;
     }
-    .top-buttons {
-        display: none !important;
+    .mobile-only {
+        display: block;
     }
     .btn {
         font-size: 1rem;
