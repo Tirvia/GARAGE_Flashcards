@@ -34,7 +34,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* Блок прогресса с кнопкой помощи */
+/* Прогресс с кнопкой помощи */
 .progress-wrapper {
     display: flex;
     align-items: center;
@@ -64,12 +64,11 @@ body {
     cursor: pointer;
     transition: background 0.2s;
 }
-
 .help-btn:hover {
     background: #ff0000;
 }
 
-/* Модальное окно для инструкции */
+/* Модальное окно */
 .modal {
     display: none;
     position: fixed;
@@ -114,19 +113,28 @@ body {
     cursor: pointer;
     color: #888;
 }
-
 .close-modal:hover {
     color: #ff0000;
 }
 
+/* Общие стили для кнопок */
 .buttons-container {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-bottom: 20px;
     flex-wrap: wrap;
     width: 100%;
     max-width: 800px;
+    margin-bottom: 20px;
+}
+
+.top-buttons {
+    margin-bottom: 20px;
+}
+
+.learning-buttons {
+    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 .btn {
@@ -136,14 +144,12 @@ body {
     color: white;
     border: none;
     border-radius: 10px;
-    margin: 10px 0;
     padding: 12px 24px;
     cursor: pointer;
     transition: background-color 0.3s;
     flex: 1;
     min-width: 160px;
 }
-
 .btn:hover {
     background-color: #b32e2e;
 }
@@ -162,6 +168,7 @@ body {
     background-color: #b71c1c;
 }
 
+/* Карточка */
 .flashcard-container {
     display: flex;
     justify-content: center;
@@ -183,7 +190,6 @@ body {
     transition: transform 0.2s ease;
     cursor: grab;
 }
-
 .flashcard:active {
     cursor: grabbing;
 }
@@ -197,11 +203,9 @@ body {
     transition: background 0.2s;
     z-index: 1;
 }
-
 .flashcard.like::after {
     background: rgba(0, 255, 0, 0.25);
 }
-
 .flashcard.dislike::after {
     background: rgba(255, 0, 0, 0.25);
 }
@@ -215,7 +219,6 @@ body {
     transform-style: preserve-3d;
     border-radius: 10px;
 }
-
 .flipped .flashcard-inner {
     transform: rotateY(180deg);
 }
@@ -231,7 +234,6 @@ body {
     justify-content: center;
     align-items: center;
 }
-
 .flashcard-back {
     position: absolute;
     top: 0;
@@ -248,18 +250,19 @@ body {
     display: block;
 }
 
+/* Анимации свайпа */
 .flashcard.swipe-right {
     transform: translateX(500px) rotate(20deg);
     opacity: 0;
     transition: 0.4s;
 }
-
 .flashcard.swipe-left {
     transform: translateX(-500px) rotate(-20deg);
     opacity: 0;
     transition: 0.4s;
 }
 
+/* Подсказка о свайпе (только мобильные) */
 .swipe-hint {
     color: white;
     text-align: center;
@@ -269,14 +272,17 @@ body {
     font-size: 0.9rem;
 }
 
+/* Адаптивность */
 .mobile-only {
     display: none;
+}
+.desktop-only {
+    display: flex;
 }
 
 .mobile-buttons {
     display: none;
 }
-
 .mobile-buttons-row {
     display: flex;
     flex-direction: row;
@@ -286,8 +292,11 @@ body {
 }
 
 @media screen and (max-width: 768px) {
-    .desktop-buttons {
+    .desktop-only {
         display: none !important;
+    }
+    .mobile-only {
+        display: block;
     }
     .mobile-buttons {
         display: flex !important;
@@ -296,8 +305,8 @@ body {
         width: 100%;
         margin-top: 10px;
     }
-    .mobile-only {
-        display: block;
+    .top-buttons {
+        display: none !important;
     }
     .btn {
         font-size: 1rem;
