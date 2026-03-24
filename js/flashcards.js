@@ -4,7 +4,7 @@ $(document).ready(function() {
     const allMode = urlParams.get('all') === 'true';
     const group = urlParams.get('group');
 
-    // Отображаемые имена для разделов
+    // Отображаемые имена для разделов (без изменений)
     const sectionDisplayNames = {
         'zavtrak': 'Завтраки',
         'Detskoe': 'Детское меню',
@@ -52,20 +52,52 @@ $(document).ready(function() {
     const $backImg = $('#backImg');
     const $questionBtn = $('#question, #question-mobile');
     const $flipBtn = $('#flipCard, #flipCard-mobile');
+    const $rememberBtn = $('#rememberBtn');
+    const $forgetBtn = $('#forgetBtn');
     const $progressInfo = $('#progressInfo');
     const $sectionTitle = $('#sectionTitle');
+    const $helpBtn = $('#helpBtn');
 
-    // ========== ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА ==========
+    // ========== МОДАЛЬНОЕ ОКНО ИНСТРУКЦИИ ==========
+    // Создаём модальное окно, если его нет
+    if (!$('.modal').length) {
+        const modalHtml = `
+            <div class="modal" id="instructionModal">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3>Как учить карточки</h3>
+                    <ul>
+                        <li><strong>Запомнил ✅</strong> — карточка удаляется из очереди.</li>
+                        <li><strong>Не запомнил ❌</strong> — карточка уходит в конец очереди.</li>
+                        <li>Свайп <strong>вправо</strong> = Запомнил, <strong>влево</strong> = Не запомнил.</li>
+                        <li>Клик по карточке или кнопка «Посмотреть состав» — перевернуть.</li>
+                        <li>Кнопка «Загадать блюдо» — показать случайную карточку (не меняет статус).</li>
+                        <li>Прогресс показывает, сколько карточек осталось выучить.</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHtml);
+    }
+
+    const $modal = $('#instructionModal');
+    const $closeModal = $('.close-modal');
+
+    $helpBtn.on('click', () => $modal.css('display', 'flex'));
+    $closeModal.on('click', () => $modal.hide());
+    $(window).on('click', (e) => {
+        if (e.target === $modal[0]) $modal.hide();
+    });
+
+    // ========== ЗАГРУЗКА КАРТОЧЕК (оптимизированная) ==========
     function checkImagePair(basePath, index) {
         return new Promise(resolve => {
             const img = new Image();
             img.src = `${basePath}${index}.png`;
-            img.onload = () => {
-                resolve({
-                    question: `${basePath}${index}.png`,
-                    answer: `${basePath}${index + 1}.png`
-                });
-            };
+            img.onload = () => resolve({
+                question: `${basePath}${index}.png`,
+                answer: `${basePath}${index + 1}.png`
+            });
             img.onerror = () => resolve(null);
         });
     }
@@ -74,9 +106,7 @@ $(document).ready(function() {
         const basePath = `../images/${sectionName}/`;
         const MAX = 100;
         const checks = [];
-        for (let i = 1; i <= MAX; i += 2) {
-            checks.push(checkImagePair(basePath, i));
-        }
+        for (let i = 1; i <= MAX; i += 2) checks.push(checkImagePair(basePath, i));
         const results = await Promise.all(checks);
         return results.filter(Boolean);
     }
@@ -86,12 +116,14 @@ $(document).ready(function() {
         $flashcard.hide();
         $questionBtn.prop('disabled', true);
         $flipBtn.prop('disabled', true);
+        $rememberBtn.prop('disabled', true);
+        $forgetBtn.prop('disabled', true);
 
-        const promises = sectionsList.map(sectionName => loadCardsFromSection(sectionName));
+        const promises = sectionsList.map(loadCardsFromSection);
         const results = await Promise.all(promises);
         allCards = results.flat();
 
-        if (allCards.length === 0) {
+        if (!allCards.length) {
             $sectionTitle.text(`Не найдено карточек для ${title}`);
             return;
         }
@@ -99,6 +131,8 @@ $(document).ready(function() {
         $sectionTitle.text(title);
         $questionBtn.prop('disabled', false);
         $flipBtn.prop('disabled', false);
+        $rememberBtn.prop('disabled', false);
+        $forgetBtn.prop('disabled', false);
 
         initLearning();
         $flashcard.show();
@@ -111,10 +145,12 @@ $(document).ready(function() {
         $flashcard.hide();
         $questionBtn.prop('disabled', true);
         $flipBtn.prop('disabled', true);
+        $rememberBtn.prop('disabled', true);
+        $forgetBtn.prop('disabled', true);
 
         allCards = await loadCardsFromSection(sectionName);
 
-        if (allCards.length === 0) {
+        if (!allCards.length) {
             $sectionTitle.text(`Раздел "${displayName}" не содержит карточек`);
             return;
         }
@@ -122,6 +158,8 @@ $(document).ready(function() {
         $sectionTitle.text(`Изучаем раздел: ${displayName}`);
         $questionBtn.prop('disabled', false);
         $flipBtn.prop('disabled', false);
+        $rememberBtn.prop('disabled', false);
+        $forgetBtn.prop('disabled', false);
 
         initLearning();
         $flashcard.show();
@@ -147,79 +185,70 @@ $(document).ready(function() {
     }
 
     function showCurrentCard() {
-        if (learningCards.length === 0) {
+        if (!learningCards.length) {
             $sectionTitle.text('🎉 Поздравляем! Вы выучили все карточки! 🎉');
             $flashcard.hide();
             $questionBtn.prop('disabled', true);
             $flipBtn.prop('disabled', true);
+            $rememberBtn.prop('disabled', true);
+            $forgetBtn.prop('disabled', true);
             return;
         }
 
         const card = learningCards[currentCardIndex];
-
         if ($flashcard.hasClass('flipped')) {
             $flashcard.removeClass('flipped');
             $flipBtn.text('Посмотреть состав');
             $('#flipCard-mobile').text('Посмотреть состав');
         }
-
         $frontImg.attr('src', card.question);
         $backImg.attr('src', card.answer);
     }
 
     function showRandomCard() {
-        if (learningCards.length === 0) return;
+        if (!learningCards.length) return;
         let newIndex = Math.floor(Math.random() * learningCards.length);
-        if (newIndex === currentCardIndex && learningCards.length > 1) {
+        if (newIndex === currentCardIndex && learningCards.length > 1)
             newIndex = (newIndex + 1) % learningCards.length;
-        }
         currentCardIndex = newIndex;
         showCurrentCard();
     }
 
-    // ========== ЛОГИКА ОБУЧЕНИЯ ==========
+    // ========== ДЕЙСТВИЯ С КАРТОЧКАМИ ==========
     function markKnown() {
-        if (learningCards.length === 0) return;
+        if (!learningCards.length) return;
         learningCards.splice(currentCardIndex, 1);
         updateProgressInfo();
-
-        if (learningCards.length === 0) {
+        if (!learningCards.length) {
             showCurrentCard();
             return;
         }
-
-        if (currentCardIndex >= learningCards.length) {
-            currentCardIndex = 0;
-        }
+        if (currentCardIndex >= learningCards.length) currentCardIndex = 0;
         animateSwipe('right');
     }
 
     function markUnknown() {
-        if (learningCards.length === 0) return;
+        if (!learningCards.length) return;
         const card = learningCards.splice(currentCardIndex, 1)[0];
         learningCards.push(card);
         updateProgressInfo();
-
-        if (currentCardIndex >= learningCards.length) {
-            currentCardIndex = 0;
-        }
+        if (currentCardIndex >= learningCards.length) currentCardIndex = 0;
         animateSwipe('left');
     }
 
     function animateSwipe(direction) {
         const className = direction === 'right' ? 'swipe-right' : 'swipe-left';
         $flashcard.addClass(className);
-
         setTimeout(() => {
             $flashcard.removeClass(className);
-            $flashcard.removeClass('like dislike'); // сброс цветовой маски
+            $flashcard.removeClass('like dislike');
             showCurrentCard();
         }, 300);
     }
 
     // ========== СВАЙП ==========
     $flashcard.on('mousedown touchstart', function(e) {
-        if (learningCards.length === 0) return;
+        if (!learningCards.length) return;
         isDragging = true;
         startX = e.pageX || e.originalEvent.touches[0].pageX;
         currentX = startX;
@@ -230,10 +259,7 @@ $(document).ready(function() {
         if (!isDragging) return;
         currentX = e.pageX || e.originalEvent.touches[0].pageX;
         let diff = currentX - startX;
-
         $flashcard.css('transform', `translateX(${diff}px) rotate(${diff * 0.05}deg)`);
-
-        // Цветовая индикация
         if (diff > 30) {
             $flashcard.addClass('like').removeClass('dislike');
         } else if (diff < -30) {
@@ -250,13 +276,8 @@ $(document).ready(function() {
         let diff = currentX - startX;
         $flashcard.css('transform', '');
         $flashcard.removeClass('like dislike');
-
         if (Math.abs(diff) > 60) {
-            if (diff > 0) {
-                markKnown();
-            } else {
-                markUnknown();
-            }
+            diff > 0 ? markKnown() : markUnknown();
         }
     });
 
@@ -278,14 +299,14 @@ $(document).ready(function() {
             $('#flipCard-mobile').text(text);
         }
     });
+    $rememberBtn.on('click', markKnown);
+    $forgetBtn.on('click', markUnknown);
 
     // ========== ЗАПУСК ==========
     if (allMode) {
         loadCardsFromSections(ALL_SECTIONS, 'Все разделы меню');
     } else if (group && GROUPS[group]) {
-        let title = '';
-        if (group === 'dinner') title = 'Ужин (все блюда)';
-        else if (group === 'bar') title = 'Бар (все напитки)';
+        let title = group === 'dinner' ? 'Ужин (все блюда)' : 'Бар (все напитки)';
         loadCardsFromSections(GROUPS[group], title);
     } else if (section) {
         loadCardsForSection(section);
@@ -294,5 +315,7 @@ $(document).ready(function() {
         $flashcard.hide();
         $questionBtn.prop('disabled', true);
         $flipBtn.prop('disabled', true);
+        $rememberBtn.prop('disabled', true);
+        $forgetBtn.prop('disabled', true);
     }
 });
