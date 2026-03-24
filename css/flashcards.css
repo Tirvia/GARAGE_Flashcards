@@ -34,77 +34,13 @@ body {
     margin-bottom: 10px;
 }
 
-.controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 600px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.mode-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: white;
-    font-size: 1rem;
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .3s;
-    border-radius: 24px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .3s;
-    border-radius: 50%;
-}
-
-input:checked + .slider {
-    background-color: #ff0000;
-}
-
-input:checked + .slider:before {
-    transform: translateX(26px);
-}
-
 .progress-info {
     color: #ff4d4d;
-    font-size: 0.9rem;
+    font-size: 1rem;
     background: rgba(255, 0, 0, 0.2);
-    padding: 4px 12px;
+    padding: 6px 16px;
     border-radius: 20px;
-    margin: 10px auto;
+    margin-bottom: 15px;
     display: inline-block;
 }
 
@@ -154,6 +90,11 @@ input:checked + .slider:before {
     height: auto;
     display: none; /* скрыта до загрузки карточек */
     transition: transform 0.2s ease, background 0.2s ease;
+    cursor: grab;
+}
+
+.flashcard:active {
+    cursor: grabbing;
 }
 
 .flashcard-inner {
@@ -198,11 +139,18 @@ input:checked + .slider:before {
     display: block;
 }
 
-/* Свайп анимация */
-.flashcard.dragging {
-    transition: none;
+/* Цветовая индикация при свайпе */
+.flashcard.like {
+    background: rgba(0, 255, 0, 0.2);
+    border-radius: 10px;
 }
 
+.flashcard.dislike {
+    background: rgba(255, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+/* Анимация улетания */
 .flashcard.swipe-right {
     transform: translateX(500px) rotate(20deg);
     opacity: 0;
@@ -215,18 +163,7 @@ input:checked + .slider:before {
     transition: 0.4s;
 }
 
-/* Цветовые индикаторы при свайпе */
-.flashcard.like {
-    background: rgba(0, 255, 0, 0.2);
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-}
-
-.flashcard.dislike {
-    background: rgba(255, 0, 0, 0.2);
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-}
-
-/* Подсказка о свайпе */
+/* Подсказка */
 .swipe-hint {
     color: white;
     text-align: center;
@@ -248,7 +185,6 @@ input:checked + .slider:before {
     width: 100%;
 }
 
-/* Адаптивность для мобильных устройств */
 @media screen and (max-width: 768px) {
     .section h2 {
         font-size: 1.5rem;
@@ -274,11 +210,6 @@ input:checked + .slider:before {
 
     .flashcard {
         max-width: 90%;
-    }
-
-    .controls {
-        flex-direction: column;
-        align-items: center;
     }
 }
 
