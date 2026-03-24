@@ -13,12 +13,18 @@
         <div class="section">
             <h2 id="sectionTitle">Загрузка...</h2>
 
-            <!-- Прогресс обучения -->
-            <div class="progress-info" id="progressInfo"></div>
+            <!-- Прогресс с кнопкой "?" -->
+            <div class="progress-wrapper">
+                <div class="progress-info" id="progressInfo"></div>
+                <button class="help-btn" id="helpBtn">?</button>
+            </div>
 
+            <!-- Десктопные кнопки (основные + обучение) -->
             <div class="buttons-container desktop-buttons">
                 <button type="button" class="btn btn-default" id="question">Загадать блюдо</button>
                 <button type="button" class="btn btn-default" id="flipCard">Посмотреть состав</button>
+                <button type="button" class="btn btn-default btn-remember" id="rememberBtn">✅ Запомнил</button>
+                <button type="button" class="btn btn-default btn-forget" id="forgetBtn">❌ Не запомнил</button>
             </div>
 
             <div class="row">
@@ -36,12 +42,12 @@
                 </div>
             </div>
 
-            <!-- Подсказка о свайпе -->
-            <div class="swipe-hint">
+            <!-- Подсказка о свайпе (для мобильных) -->
+            <div class="swipe-hint mobile-only">
                 ← Не запомнил &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; Запомнил →
             </div>
 
-            <!-- Мобильные кнопки (только загадать и перевернуть) -->
+            <!-- Мобильные кнопки (только основные, обучение через свайп) -->
             <div class="buttons-container mobile-buttons">
                 <div class="mobile-buttons-row">
                     <button type="button" class="btn btn-default" id="question-mobile">Загадать блюдо</button>
