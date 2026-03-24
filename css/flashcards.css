@@ -83,18 +83,39 @@ body {
 }
 
 .flashcard {
+    position: relative;
+    overflow: hidden;
     background: transparent;
     border-radius: 10px;
     max-width: 500px;
     width: 100%;
     height: auto;
-    display: none; /* скрыта до загрузки карточек */
-    transition: transform 0.2s ease, background 0.2s ease;
+    display: none;
+    transition: transform 0.2s ease;
     cursor: grab;
 }
 
 .flashcard:active {
     cursor: grabbing;
+}
+
+/* Оверлей для цветовой индикации */
+.flashcard::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    pointer-events: none;
+    transition: background 0.2s;
+    z-index: 1;
+}
+
+.flashcard.like::after {
+    background: rgba(0, 255, 0, 0.25);
+}
+
+.flashcard.dislike::after {
+    background: rgba(255, 0, 0, 0.25);
 }
 
 .flashcard-inner {
@@ -137,17 +158,6 @@ body {
     object-fit: contain;
     border-radius: 5px;
     display: block;
-}
-
-/* Цветовая индикация при свайпе */
-.flashcard.like {
-    background: rgba(0, 255, 0, 0.2);
-    border-radius: 10px;
-}
-
-.flashcard.dislike {
-    background: rgba(255, 0, 0, 0.2);
-    border-radius: 10px;
 }
 
 /* Анимация улетания */
