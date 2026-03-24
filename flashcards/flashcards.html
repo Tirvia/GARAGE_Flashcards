@@ -19,12 +19,10 @@
                 <button class="help-btn" id="helpBtn">?</button>
             </div>
 
-            <!-- Десктопные кнопки (основные + обучение) -->
-            <div class="buttons-container desktop-buttons">
+            <!-- Верхний ряд кнопок (десктоп + мобильные) -->
+            <div class="buttons-container top-buttons">
                 <button type="button" class="btn btn-default" id="question">Загадать блюдо</button>
                 <button type="button" class="btn btn-default" id="flipCard">Посмотреть состав</button>
-                <button type="button" class="btn btn-default btn-remember" id="rememberBtn">✅ Запомнил</button>
-                <button type="button" class="btn btn-default btn-forget" id="forgetBtn">❌ Не запомнил</button>
             </div>
 
             <div class="row">
@@ -42,12 +40,18 @@
                 </div>
             </div>
 
-            <!-- Подсказка о свайпе (для мобильных) -->
+            <!-- Десктопные кнопки обучения (под карточкой) -->
+            <div class="buttons-container learning-buttons desktop-only">
+                <button type="button" class="btn btn-remember" id="rememberBtn">✅ Запомнил</button>
+                <button type="button" class="btn btn-forget" id="forgetBtn">❌ Не запомнил</button>
+            </div>
+
+            <!-- Подсказка о свайпе (только для мобильных) -->
             <div class="swipe-hint mobile-only">
                 ← Не запомнил &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; Запомнил →
             </div>
 
-            <!-- Мобильные кнопки (только основные, обучение через свайп) -->
+            <!-- Мобильные кнопки (дублируют верхний ряд) -->
             <div class="buttons-container mobile-buttons">
                 <div class="mobile-buttons-row">
                     <button type="button" class="btn btn-default" id="question-mobile">Загадать блюдо</button>
