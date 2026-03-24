@@ -187,11 +187,14 @@ $(document).ready(function() {
         currentCardIndex = index;
         const card = cards[currentCardIndex];
 
-        // Обновляем текст кнопок (на случай, если они были изменены)
+        // Скрываем карточку, чтобы не показывать переходные состояния
+        $flashcard.hide();
+        
+        // Сбрасываем текст кнопок
         $flipBtn.text('Посмотреть состав');
         $('#flipCard-mobile').text('Посмотреть состав');
-
-        // Создаём промисы для загрузки новых изображений
+        
+        // Загружаем новые изображения
         const questionLoad = new Promise((resolve) => {
             const img = new Image();
             img.onload = resolve;
@@ -205,13 +208,13 @@ $(document).ready(function() {
             img.src = card.answer;
         });
 
-        // Ждём загрузки обоих изображений, затем меняем src и сбрасываем переворот
+        // После загрузки обновляем src и сбрасываем переворот
         Promise.all([questionLoad, answerLoad]).then(() => {
             $frontImg.attr('src', card.question);
             $backImg.attr('src', card.answer);
-            // Сбрасываем переворот (если карточка была перевёрнута)
+            // Сбрасываем переворот
             $flashcard.removeClass('flipped');
-            // Показываем карточку (на случай если была скрыта)
+            // Показываем карточку
             $flashcard.show();
         });
     }
