@@ -24,7 +24,7 @@ $(document).ready(function() {
         'Chaj': 'Чай',
         'Bezalco': 'Безалкогольные коктейли',
         'alco': 'Алкогольные коктейли',
-        'Alco_1 1': 'Коктейли 1+1'
+        'Alco_1+1': 'Коктейли 1+1'
     };
 
     // Определение разделов для групп
@@ -187,13 +187,19 @@ $(document).ready(function() {
         currentCardIndex = index;
         const card = cards[currentCardIndex];
 
-        $frontImg.attr('src', card.question);
-        $backImg.attr('src', card.answer);
-
+        // Скрываем карточку, чтобы избежать артефактов при смене
+        $flashcard.hide();
+        // Сбрасываем состояние переворота
         $flashcard.removeClass('flipped');
+        // Обновляем текст кнопок (на случай, если они были изменены)
         $flipBtn.text('Посмотреть состав');
         $('#flipCard-mobile').text('Посмотреть состав');
 
+        // Устанавливаем новые изображения
+        $frontImg.attr('src', card.question);
+        $backImg.attr('src', card.answer);
+
+        // После установки src показываем карточку
         $flashcard.show();
     }
 
@@ -208,6 +214,8 @@ $(document).ready(function() {
     // Обработчики событий
     $questionBtn.on('click', showRandomCard);
     $flipBtn.on('click', flipCard);
+    // Клик по карточке переворачивает её
+    $flashcard.on('click', flipCard);
 
     $noRepeatCheckbox.on('change', function() {
         noRepeatMode = $(this).is(':checked');
