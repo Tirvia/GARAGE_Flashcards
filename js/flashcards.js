@@ -24,13 +24,13 @@ $(document).ready(function() {
         'Chaj': 'Чай',
         'Bezalco': 'Безалкогольные коктейли',
         'alco': 'Алкогольные коктейли',
-        'Alco_1+1': 'Коктейли 1+1'
+        'Alco_1 1': 'Коктейли 1+1'
     };
 
     // Определение разделов для групп
     const GROUPS = {
         dinner: ['Salaty', 'Zacuski', 'Supy', 'Gor_bluda', 'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty'],
-        bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1+1']
+        bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1']
     };
 
     // Все возможные разделы (полный список)
@@ -38,7 +38,7 @@ $(document).ready(function() {
         'zavtrak', 'Detskoe', 'Salaty', 'Zacuski', 'Supy', 'Gor_bluda',
         'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty', '103BY',
         'Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco',
-        'alco', 'Alco_1+1'
+        'alco', 'Alco_1 1'
     ];
 
     let cards = [];
