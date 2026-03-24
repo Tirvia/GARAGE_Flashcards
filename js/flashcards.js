@@ -187,9 +187,14 @@ $(document).ready(function() {
         currentCardIndex = index;
         const card = cards[currentCardIndex];
 
-        // Скрываем карточку, чтобы не показывать переходные состояния
-        $flashcard.hide();
+        // Мгновенно очищаем изображения
+        $frontImg.attr('src', '');
+        $backImg.attr('src', '');
         
+        // Скрываем карточку
+        $flashcard.hide();
+        // Сбрасываем состояние переворота
+        $flashcard.removeClass('flipped');
         // Сбрасываем текст кнопок
         $flipBtn.text('Посмотреть состав');
         $('#flipCard-mobile').text('Посмотреть состав');
@@ -208,12 +213,10 @@ $(document).ready(function() {
             img.src = card.answer;
         });
 
-        // После загрузки обновляем src и сбрасываем переворот
+        // После загрузки обновляем src и показываем карточку
         Promise.all([questionLoad, answerLoad]).then(() => {
             $frontImg.attr('src', card.question);
             $backImg.attr('src', card.answer);
-            // Сбрасываем переворот
-            $flashcard.removeClass('flipped');
             // Показываем карточку
             $flashcard.show();
         });
