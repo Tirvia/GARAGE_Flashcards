@@ -170,6 +170,31 @@ $(document).ready(function() {
         }
     }
 
+    // Функция для обновления изображений без скрытия карточки
+    function updateCardImages(card) {
+        const newFront = new Image();
+        const newBack = new Image();
+
+        let loaded = 0;
+
+        function checkLoaded() {
+            loaded++;
+            if (loaded === 2) {
+                // Меняем картинки сразу, без скрытия
+                $frontImg.attr('src', card.question);
+                $backImg.attr('src', card.answer);
+            }
+        }
+
+        newFront.onload = checkLoaded;
+        newBack.onload = checkLoaded;
+        newFront.onerror = checkLoaded;
+        newBack.onerror = checkLoaded;
+
+        newFront.src = card.question;
+        newBack.src = card.answer;
+    }
+
     function showRandomCard() {
         if (cards.length === 0) return;
 
@@ -187,39 +212,21 @@ $(document).ready(function() {
         currentCardIndex = index;
         const card = cards[currentCardIndex];
 
-        // Мгновенно очищаем изображения
-        $frontImg.attr('src', '');
-        $backImg.attr('src', '');
-        
-        // Скрываем карточку
-        $flashcard.hide();
-        // Сбрасываем состояние переворота
-        $flashcard.removeClass('flipped');
-        // Сбрасываем текст кнопок
-        $flipBtn.text('Посмотреть состав');
-        $('#flipCard-mobile').text('Посмотреть состав');
-        
-        // Загружаем новые изображения
-        const questionLoad = new Promise((resolve) => {
-            const img = new Image();
-            img.onload = resolve;
-            img.onerror = resolve;
-            img.src = card.question;
-        });
-        const answerLoad = new Promise((resolve) => {
-            const img = new Image();
-            img.onload = resolve;
-            img.onerror = resolve;
-            img.src = card.answer;
-        });
+        // Если карточка перевёрнута — сначала вернуть обратно
+        if ($flashcard.hasClass('flipped')) {
+            $flashcard.removeClass('flipped');
 
-        // После загрузки обновляем src и показываем карточку
-        Promise.all([questionLoad, answerLoad]).then(() => {
-            $frontImg.attr('src', card.question);
-            $backImg.attr('src', card.answer);
-            // Показываем карточку
-            $flashcard.show();
-        });
+            const text = 'Посмотреть состав';
+            $flipBtn.text(text);
+            $('#flipCard-mobile').text(text);
+
+            // Ждём окончания анимации переворота (0.6s из CSS)
+            setTimeout(() => {
+                updateCardImages(card);
+            }, 300); // 300 мс достаточно, чтобы анимация успела завершиться
+        } else {
+            updateCardImages(card);
+        }
     }
 
     function flipCard() {
