@@ -1,0 +1,254 @@
+body {
+    background-color: black;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.wrap-container {
+    background-color: #000000;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container-fluid {
+    margin: 0;
+    padding: 0;
+    flex: 1;
+}
+
+.section {
+    padding: 10px 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.section h2 {
+    text-align: center;
+    color: #f0cece;
+    text-shadow: 2px 2px 2px black;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 1rem;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #ff0000;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.progress-info {
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    background: rgba(255, 0, 0, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 600px;
+}
+
+.btn {
+    font-size: 1.2rem;
+    text-align: center;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    margin: 10px 0;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    flex: 1;
+    min-width: 200px;
+}
+
+.btn:hover {
+    background-color: #b32e2e;
+}
+
+.flashcard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    width: 100%;
+    perspective: 1000px;
+}
+
+.flashcard {
+    background: transparent;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+    height: auto;
+    display: none; /* скрыта до загрузки карточек */
+}
+
+.flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: auto;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    border-radius: 10px;
+}
+
+.flipped .flashcard-inner {
+    transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+    position: relative;
+    width: 100%;
+    height: auto;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flashcard-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotateY(180deg);
+}
+
+.card-image {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 5px;
+    display: block;
+}
+
+.mobile-buttons {
+    display: none;
+}
+
+.mobile-buttons-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Адаптивность для мобильных устройств */
+@media screen and (max-width: 768px) {
+    .section h2 {
+        font-size: 1.5rem;
+    }
+
+    .desktop-buttons {
+        display: none !important;
+    }
+
+    .mobile-buttons {
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .btn {
+        font-size: 1rem;
+        padding: 10px 15px;
+        min-width: 140px;
+    }
+
+    .flashcard {
+        max-width: 90%;
+    }
+
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .section h2 {
+        font-size: 1.3rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        min-width: 120px;
+    }
+}

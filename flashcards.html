@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Флеш-карточки | GARAGE</title>
+    <link rel="stylesheet" href="css/flashcards.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="wrap-container">
+    <div class="container-fluid">
+        <div class="section">
+            <h2 id="sectionTitle">Загрузка...</h2>
+
+            <div class="controls">
+                <div class="mode-toggle">
+                    <label class="switch">
+                        <input type="checkbox" id="noRepeatMode">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Режим без повторений</span>
+                </div>
+                <div class="progress-info" id="progressInfo"></div>
+            </div>
+
+            <div class="buttons-container desktop-buttons">
+                <button type="button" class="btn btn-default" id="question">Загадать блюдо</button>
+                <button type="button" class="btn btn-default" id="flipCard">Посмотреть состав</button>
+            </div>
+
+            <div class="row">
+                <div class="flashcard-container">
+                    <div class="flashcard">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <img src="" id="frontImg" class="card-image" alt="question">
+                            </div>
+                            <div class="flashcard-back">
+                                <img src="" id="backImg" class="card-image" alt="answer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons-container mobile-buttons">
+                <div class="mobile-buttons-row">
+                    <button type="button" class="btn btn-default" id="question-mobile">Загадать блюдо</button>
+                    <button type="button" class="btn btn-default" id="flipCard-mobile">Посмотреть состав</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/flashcards.js"></script>
+</body>
+</html>
