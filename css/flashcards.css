@@ -104,6 +104,8 @@ input:checked + .slider:before {
     background: rgba(255, 0, 0, 0.2);
     padding: 4px 12px;
     border-radius: 20px;
+    margin: 10px auto;
+    display: inline-block;
 }
 
 .buttons-container {
@@ -151,6 +153,7 @@ input:checked + .slider:before {
     width: 100%;
     height: auto;
     display: none; /* скрыта до загрузки карточек */
+    transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .flashcard-inner {
@@ -193,6 +196,44 @@ input:checked + .slider:before {
     object-fit: contain;
     border-radius: 5px;
     display: block;
+}
+
+/* Свайп анимация */
+.flashcard.dragging {
+    transition: none;
+}
+
+.flashcard.swipe-right {
+    transform: translateX(500px) rotate(20deg);
+    opacity: 0;
+    transition: 0.4s;
+}
+
+.flashcard.swipe-left {
+    transform: translateX(-500px) rotate(-20deg);
+    opacity: 0;
+    transition: 0.4s;
+}
+
+/* Цветовые индикаторы при свайпе */
+.flashcard.like {
+    background: rgba(0, 255, 0, 0.2);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+.flashcard.dislike {
+    background: rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+/* Подсказка о свайпе */
+.swipe-hint {
+    color: white;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    opacity: 0.7;
+    font-size: 0.9rem;
 }
 
 .mobile-buttons {
@@ -240,32 +281,7 @@ input:checked + .slider:before {
         align-items: center;
     }
 }
-/* Подсказка о свайпе */
-.swipe-hint {
-    color: white;
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 15px;
-    opacity: 0.7;
-    font-size: 0.9rem;
-}
 
-/* Анимация свайпа */
-.flashcard.dragging {
-    transition: none;
-}
-
-.flashcard.swipe-right {
-    transform: translateX(500px) rotate(20deg);
-    opacity: 0;
-    transition: 0.4s;
-}
-
-.flashcard.swipe-left {
-    transform: translateX(-500px) rotate(-20deg);
-    opacity: 0;
-    transition: 0.4s;
-}
 @media screen and (max-width: 480px) {
     .section h2 {
         font-size: 1.3rem;
