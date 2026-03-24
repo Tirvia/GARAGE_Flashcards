@@ -24,13 +24,13 @@ $(document).ready(function() {
         'Chaj': 'Чай',
         'Bezalco': 'Безалкогольные коктейли',
         'alco': 'Алкогольные коктейли',
-        'Alco_1 1': 'Коктейли 1+1'
+        'Alco_1+1': 'Коктейли 1+1'
     };
 
     // Определение разделов для групп
     const GROUPS = {
         dinner: ['Salaty', 'Zacuski', 'Supy', 'Gor_bluda', 'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty'],
-        bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1']
+        bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1+1']
     };
 
     // Все возможные разделы (полный список)
@@ -38,7 +38,7 @@ $(document).ready(function() {
         'zavtrak', 'Detskoe', 'Salaty', 'Zacuski', 'Supy', 'Gor_bluda',
         'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty', '103BY',
         'Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco',
-        'alco', 'Alco_1 1'
+        'alco', 'Alco_1+1'
     ];
 
     let cards = [];
@@ -78,7 +78,6 @@ $(document).ready(function() {
 
     // Загрузка карточек из одного раздела
     async function loadCardsFromSection(sectionName) {
-        // Путь относительно папки flashcards: images находится на уровень выше
         const basePath = `../images/${sectionName}/`;
         const maxNum = await getMaxImageNumber(basePath);
         const sectionCards = [];
@@ -188,23 +187,32 @@ $(document).ready(function() {
         currentCardIndex = index;
         const card = cards[currentCardIndex];
 
-        // Скрываем карточку
-        $flashcard.hide();
-        // Сбрасываем состояние переворота
-        $flashcard.removeClass('flipped');
-        // Обновляем текст кнопок
+        // Обновляем текст кнопок (на случай, если они были изменены)
         $flipBtn.text('Посмотреть состав');
         $('#flipCard-mobile').text('Посмотреть состав');
 
-        // Устанавливаем новые изображения
-        $frontImg.attr('src', card.question);
-        $backImg.attr('src', card.answer);
+        // Создаём промисы для загрузки новых изображений
+        const questionLoad = new Promise((resolve) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = card.question;
+        });
+        const answerLoad = new Promise((resolve) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = card.answer;
+        });
 
-        // Ждём следующего кадра анимации, чтобы браузер успел применить изменения
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                $flashcard.show();
-            });
+        // Ждём загрузки обоих изображений, затем меняем src и сбрасываем переворот
+        Promise.all([questionLoad, answerLoad]).then(() => {
+            $frontImg.attr('src', card.question);
+            $backImg.attr('src', card.answer);
+            // Сбрасываем переворот (если карточка была перевёрнута)
+            $flashcard.removeClass('flipped');
+            // Показываем карточку (на случай если была скрыта)
+            $flashcard.show();
         });
     }
 
@@ -219,7 +227,6 @@ $(document).ready(function() {
     // Обработчики событий
     $questionBtn.on('click', showRandomCard);
     $flipBtn.on('click', flipCard);
-    // Клик по карточке переворачивает её
     $flashcard.on('click', flipCard);
 
     $noRepeatCheckbox.on('change', function() {
