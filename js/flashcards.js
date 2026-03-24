@@ -27,7 +27,7 @@ $(document).ready(function() {
         'Alco_1 1': 'Коктейли 1+1'
     };
 
-    // Определение разделов для групп
+    // Группы
     const GROUPS = {
         dinner: ['Salaty', 'Zacuski', 'Supy', 'Gor_bluda', 'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty'],
         bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1']
@@ -40,9 +40,11 @@ $(document).ready(function() {
         'alco', 'Alco_1 1'
     ];
 
-    let allCards = [];
-    let learningCards = [];
+    let allCards = [];          // все загруженные карточки
+    let learningCards = [];     // очередь для обучения
     let currentCardIndex = 0;
+
+    // Для свайпа
     let isDragging = false;
     let startX = 0;
     let currentX = 0;
@@ -56,21 +58,35 @@ $(document).ready(function() {
     const $progressInfo = $('#progressInfo');
     const $sectionTitle = $('#sectionTitle');
 
-    // ========== ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА (без getMaxImageNumber) ==========
-    async function loadCardsFromSection(sectionName) {
-        const basePath = `../images/${sectionName}/`;
-        const sectionCards = [];
-        const MAX = 100; // запас – больше, чем в любой папке
-
-        for (let i = 1; i <= MAX; i += 2) {
-            sectionCards.push({
-                question: `${basePath}${i}.png`,
-                answer: `${basePath}${i+1}.png`
-            });
-        }
-        return sectionCards;
+    // ========== ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА (параллельная проверка) ==========
+    function checkImagePair(basePath, index) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.src = `${basePath}${index}.png`;
+            img.onload = () => {
+                resolve({
+                    question: `${basePath}${index}.png`,
+                    answer: `${basePath}${index + 1}.png`
+                });
+            };
+            img.onerror = () => resolve(null);
+        });
     }
 
+    async function loadCardsFromSection(sectionName) {
+        const basePath = `../images/${sectionName}/`;
+        const MAX = 100; // запас, больше чем реальных картинок
+        const checks = [];
+
+        for (let i = 1; i <= MAX; i += 2) {
+            checks.push(checkImagePair(basePath, i));
+        }
+
+        const results = await Promise.all(checks);
+        return results.filter(Boolean); // удаляем null (несуществующие)
+    }
+
+    // Загрузка из нескольких разделов
     async function loadCardsFromSections(sectionsList, title) {
         $sectionTitle.text(`Загрузка ${title}...`);
         $flashcard.hide();
@@ -90,12 +106,9 @@ $(document).ready(function() {
         $questionBtn.prop('disabled', false);
         $flipBtn.prop('disabled', false);
 
-        learningCards = [...allCards];
-        shuffleArray(learningCards);
-        currentCardIndex = 0;
-        updateProgressInfo();
-        showCurrentCard();
+        initLearning();
         $flashcard.show();
+        showCurrentCard();
     }
 
     async function loadCardsForSection(sectionName) {
@@ -116,12 +129,17 @@ $(document).ready(function() {
         $questionBtn.prop('disabled', false);
         $flipBtn.prop('disabled', false);
 
+        initLearning();
+        $flashcard.show();
+        showCurrentCard();
+    }
+
+    // Инициализация очереди обучения
+    function initLearning() {
         learningCards = [...allCards];
         shuffleArray(learningCards);
         currentCardIndex = 0;
         updateProgressInfo();
-        showCurrentCard();
-        $flashcard.show();
     }
 
     function shuffleArray(arr) {
@@ -132,15 +150,10 @@ $(document).ready(function() {
     }
 
     function updateProgressInfo() {
-        $progressInfo.text(`Осталось карточек: ${learningCards.length} / ${allCards.length}`);
+        $progressInfo.text(`Осталось: ${learningCards.length} / ${allCards.length}`);
     }
 
-    // Простая смена картинок (без preload)
-    function updateCardImages(card) {
-        $frontImg.attr('src', card.question);
-        $backImg.attr('src', card.answer);
-    }
-
+    // Показать текущую карточку
     function showCurrentCard() {
         if (learningCards.length === 0) {
             $sectionTitle.text('🎉 Поздравляем! Вы выучили все карточки! 🎉');
@@ -152,15 +165,19 @@ $(document).ready(function() {
 
         const card = learningCards[currentCardIndex];
 
+        // Если карточка перевёрнута – возвращаем
         if ($flashcard.hasClass('flipped')) {
             $flashcard.removeClass('flipped');
             $flipBtn.text('Посмотреть состав');
             $('#flipCard-mobile').text('Посмотреть состав');
         }
 
-        updateCardImages(card);
+        // Мгновенная смена изображений (без предзагрузки)
+        $frontImg.attr('src', card.question);
+        $backImg.attr('src', card.answer);
     }
 
+    // Случайная карточка (без изменения очереди)
     function showRandomCard() {
         if (learningCards.length === 0) return;
         let newIndex = Math.floor(Math.random() * learningCards.length);
@@ -174,11 +191,12 @@ $(document).ready(function() {
     // ========== ЛОГИКА ОБУЧЕНИЯ ==========
     function markKnown() {
         if (learningCards.length === 0) return;
+
         learningCards.splice(currentCardIndex, 1);
         updateProgressInfo();
 
         if (learningCards.length === 0) {
-            showCurrentCard();
+            showCurrentCard(); // выведет поздравление
             return;
         }
 
@@ -190,6 +208,7 @@ $(document).ready(function() {
 
     function markUnknown() {
         if (learningCards.length === 0) return;
+
         const card = learningCards.splice(currentCardIndex, 1)[0];
         learningCards.push(card);
         updateProgressInfo();
@@ -203,18 +222,18 @@ $(document).ready(function() {
     function animateSwipe(direction) {
         const className = direction === 'right' ? 'swipe-right' : 'swipe-left';
         $flashcard.addClass(className);
-
         setTimeout(() => {
             $flashcard.removeClass(className);
             showCurrentCard();
         }, 300);
     }
 
-    // ========== СВАЙПЫ ==========
+    // ========== СВАЙП (мышь/тач) ==========
     $flashcard.on('mousedown touchstart', function(e) {
         if (learningCards.length === 0) return;
         isDragging = true;
         startX = e.pageX || e.originalEvent.touches[0].pageX;
+        currentX = startX; // инициализируем
         $flashcard.addClass('dragging');
     });
 
@@ -222,6 +241,8 @@ $(document).ready(function() {
         if (!isDragging) return;
         currentX = e.pageX || e.originalEvent.touches[0].pageX;
         let diff = currentX - startX;
+
+        // Перемещение карточки
         $flashcard.css('transform', `translateX(${diff}px) rotate(${diff * 0.05}deg)`);
 
         // Цветовая индикация
@@ -237,20 +258,21 @@ $(document).ready(function() {
     $(document).on('mouseup touchend', function() {
         if (!isDragging) return;
         isDragging = false;
-        let diff = currentX - startX;
-        $flashcard.css('transform', '').removeClass('like dislike');
         $flashcard.removeClass('dragging');
+        let diff = currentX - startX;
+        $flashcard.css('transform', '');
+        $flashcard.removeClass('like dislike');
 
-        if (Math.abs(diff) > 60) { // порог уменьшен до 60px
+        if (Math.abs(diff) > 60) {  // порог свайпа уменьшен
             if (diff > 0) {
-                markKnown();
+                markKnown();   // вправо – выучено
             } else {
-                markUnknown();
+                markUnknown(); // влево – повторить
             }
         }
     });
 
-    // ========== КНОПКИ ==========
+    // ========== ОБРАБОТЧИКИ КНОПОК ==========
     $questionBtn.on('click', showRandomCard);
     $flipBtn.on('click', function() {
         if ($flashcard.is(':visible')) {
