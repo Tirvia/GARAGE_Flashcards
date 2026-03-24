@@ -33,7 +33,6 @@ $(document).ready(function() {
         bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1']
     };
 
-    // Все возможные разделы
     const ALL_SECTIONS = [
         'zavtrak', 'Detskoe', 'Salaty', 'Zacuski', 'Supy', 'Gor_bluda',
         'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty', '103BY',
@@ -41,9 +40,9 @@ $(document).ready(function() {
         'alco', 'Alco_1 1'
     ];
 
-    let allCards = [];          // все загруженные карточки (неизменяемые)
-    let learningCards = [];     // текущая очередь для обучения
-    let currentCardIndex = 0;   // индекс в learningCards
+    let allCards = [];
+    let learningCards = [];
+    let currentCardIndex = 0;
     let isDragging = false;
     let startX = 0;
     let currentX = 0;
@@ -54,54 +53,29 @@ $(document).ready(function() {
     const $backImg = $('#backImg');
     const $questionBtn = $('#question, #question-mobile');
     const $flipBtn = $('#flipCard, #flipCard-mobile');
-    const $forgetBtn = $('#forgetBtn, #forgetBtn-mobile');
-    const $rememberBtn = $('#rememberBtn, #rememberBtn-mobile');
     const $progressInfo = $('#progressInfo');
     const $sectionTitle = $('#sectionTitle');
 
-    // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
-    function getMaxImageNumber(folderPath) {
-        return new Promise((resolve) => {
-            let i = 1;
-            let maxNumber = 0;
-            function checkImage(num) {
-                const img = new Image();
-                img.onload = () => {
-                    maxNumber = num;
-                    checkImage(num + 1);
-                };
-                img.onerror = () => {
-                    resolve(maxNumber);
-                };
-                img.src = `${folderPath}${num}.png`;
-            }
-            checkImage(1);
-        });
-    }
-
+    // ========== ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА (без getMaxImageNumber) ==========
     async function loadCardsFromSection(sectionName) {
         const basePath = `../images/${sectionName}/`;
-        const maxNum = await getMaxImageNumber(basePath);
         const sectionCards = [];
-        for (let i = 1; i <= maxNum; i += 2) {
-            if (i + 1 <= maxNum) {
-                sectionCards.push({
-                    question: `${basePath}${i}.png`,
-                    answer: `${basePath}${i+1}.png`
-                });
-            }
+        const MAX = 100; // запас – больше, чем в любой папке
+
+        for (let i = 1; i <= MAX; i += 2) {
+            sectionCards.push({
+                question: `${basePath}${i}.png`,
+                answer: `${basePath}${i+1}.png`
+            });
         }
         return sectionCards;
     }
 
-    // Загрузка карточек из нескольких разделов
     async function loadCardsFromSections(sectionsList, title) {
         $sectionTitle.text(`Загрузка ${title}...`);
         $flashcard.hide();
         $questionBtn.prop('disabled', true);
         $flipBtn.prop('disabled', true);
-        $forgetBtn.prop('disabled', true);
-        $rememberBtn.prop('disabled', true);
 
         const promises = sectionsList.map(sectionName => loadCardsFromSection(sectionName));
         const results = await Promise.all(promises);
@@ -115,10 +89,7 @@ $(document).ready(function() {
         $sectionTitle.text(title);
         $questionBtn.prop('disabled', false);
         $flipBtn.prop('disabled', false);
-        $forgetBtn.prop('disabled', false);
-        $rememberBtn.prop('disabled', false);
 
-        // Инициализация очереди обучения
         learningCards = [...allCards];
         shuffleArray(learningCards);
         currentCardIndex = 0;
@@ -133,8 +104,6 @@ $(document).ready(function() {
         $flashcard.hide();
         $questionBtn.prop('disabled', true);
         $flipBtn.prop('disabled', true);
-        $forgetBtn.prop('disabled', true);
-        $rememberBtn.prop('disabled', true);
 
         allCards = await loadCardsFromSection(sectionName);
 
@@ -146,8 +115,6 @@ $(document).ready(function() {
         $sectionTitle.text(`Изучаем раздел: ${displayName}`);
         $questionBtn.prop('disabled', false);
         $flipBtn.prop('disabled', false);
-        $forgetBtn.prop('disabled', false);
-        $rememberBtn.prop('disabled', false);
 
         learningCards = [...allCards];
         shuffleArray(learningCards);
@@ -165,86 +132,56 @@ $(document).ready(function() {
     }
 
     function updateProgressInfo() {
-        const total = learningCards.length;
-        $progressInfo.text(`Осталось карточек: ${total} / ${allCards.length}`);
+        $progressInfo.text(`Осталось карточек: ${learningCards.length} / ${allCards.length}`);
     }
 
-    // Показать текущую карточку (без изменения состояния)
+    // Простая смена картинок (без preload)
+    function updateCardImages(card) {
+        $frontImg.attr('src', card.question);
+        $backImg.attr('src', card.answer);
+    }
+
     function showCurrentCard() {
         if (learningCards.length === 0) {
             $sectionTitle.text('🎉 Поздравляем! Вы выучили все карточки! 🎉');
             $flashcard.hide();
             $questionBtn.prop('disabled', true);
             $flipBtn.prop('disabled', true);
-            $forgetBtn.prop('disabled', true);
-            $rememberBtn.prop('disabled', true);
             return;
         }
 
         const card = learningCards[currentCardIndex];
 
-        // Если карточка была перевёрнута, возвращаем в исходное положение
         if ($flashcard.hasClass('flipped')) {
             $flashcard.removeClass('flipped');
             $flipBtn.text('Посмотреть состав');
             $('#flipCard-mobile').text('Посмотреть состав');
         }
 
-        // Плавно обновляем изображения
         updateCardImages(card);
     }
 
-    // Плавная смена изображений (без скрытия карточки)
-    function updateCardImages(card) {
-        const newFront = new Image();
-        const newBack = new Image();
-
-        let loaded = 0;
-
-        function checkLoaded() {
-            loaded++;
-            if (loaded === 2) {
-                $frontImg.attr('src', card.question);
-                $backImg.attr('src', card.answer);
-            }
-        }
-
-        newFront.onload = checkLoaded;
-        newBack.onload = checkLoaded;
-        newFront.onerror = checkLoaded;
-        newBack.onerror = checkLoaded;
-
-        newFront.src = card.question;
-        newBack.src = card.answer;
-    }
-
-    // Случайная карточка (без изменения очереди)
     function showRandomCard() {
         if (learningCards.length === 0) return;
-        const newIndex = Math.floor(Math.random() * learningCards.length);
+        let newIndex = Math.floor(Math.random() * learningCards.length);
         if (newIndex === currentCardIndex && learningCards.length > 1) {
-            // чтобы не показывать ту же самую, если есть другие
-            currentCardIndex = (newIndex + 1) % learningCards.length;
-        } else {
-            currentCardIndex = newIndex;
+            newIndex = (newIndex + 1) % learningCards.length;
         }
+        currentCardIndex = newIndex;
         showCurrentCard();
     }
 
     // ========== ЛОГИКА ОБУЧЕНИЯ ==========
     function markKnown() {
         if (learningCards.length === 0) return;
-
-        // Удаляем текущую карточку
         learningCards.splice(currentCardIndex, 1);
         updateProgressInfo();
 
         if (learningCards.length === 0) {
-            showCurrentCard(); // покажет сообщение о завершении
+            showCurrentCard();
             return;
         }
 
-        // Корректируем индекс, если удалили последний
         if (currentCardIndex >= learningCards.length) {
             currentCardIndex = 0;
         }
@@ -253,13 +190,10 @@ $(document).ready(function() {
 
     function markUnknown() {
         if (learningCards.length === 0) return;
-
-        // Перемещаем текущую карточку в конец
         const card = learningCards.splice(currentCardIndex, 1)[0];
         learningCards.push(card);
         updateProgressInfo();
 
-        // Индекс остаётся на том же месте (теперь там следующий элемент)
         if (currentCardIndex >= learningCards.length) {
             currentCardIndex = 0;
         }
@@ -276,7 +210,7 @@ $(document).ready(function() {
         }, 300);
     }
 
-    // ========== СВАЙПЫ МЫШЬЮ / ТАЧАМИ ==========
+    // ========== СВАЙПЫ ==========
     $flashcard.on('mousedown touchstart', function(e) {
         if (learningCards.length === 0) return;
         isDragging = true;
@@ -289,16 +223,25 @@ $(document).ready(function() {
         currentX = e.pageX || e.originalEvent.touches[0].pageX;
         let diff = currentX - startX;
         $flashcard.css('transform', `translateX(${diff}px) rotate(${diff * 0.05}deg)`);
+
+        // Цветовая индикация
+        if (diff > 30) {
+            $flashcard.addClass('like').removeClass('dislike');
+        } else if (diff < -30) {
+            $flashcard.addClass('dislike').removeClass('like');
+        } else {
+            $flashcard.removeClass('like dislike');
+        }
     });
 
     $(document).on('mouseup touchend', function() {
         if (!isDragging) return;
         isDragging = false;
-        $flashcard.removeClass('dragging');
         let diff = currentX - startX;
-        $flashcard.css('transform', '');
+        $flashcard.css('transform', '').removeClass('like dislike');
+        $flashcard.removeClass('dragging');
 
-        if (Math.abs(diff) > 120) {
+        if (Math.abs(diff) > 60) { // порог уменьшен до 60px
             if (diff > 0) {
                 markKnown();
             } else {
@@ -307,7 +250,7 @@ $(document).ready(function() {
         }
     });
 
-    // ========== ОБРАБОТЧИКИ КНОПОК ==========
+    // ========== КНОПКИ ==========
     $questionBtn.on('click', showRandomCard);
     $flipBtn.on('click', function() {
         if ($flashcard.is(':visible')) {
@@ -326,9 +269,6 @@ $(document).ready(function() {
         }
     });
 
-    $rememberBtn.on('click', markKnown);
-    $forgetBtn.on('click', markUnknown);
-
     // ========== ЗАПУСК ==========
     if (allMode) {
         loadCardsFromSections(ALL_SECTIONS, 'Все разделы меню');
@@ -344,7 +284,5 @@ $(document).ready(function() {
         $flashcard.hide();
         $questionBtn.prop('disabled', true);
         $flipBtn.prop('disabled', true);
-        $forgetBtn.prop('disabled', true);
-        $rememberBtn.prop('disabled', true);
     }
 });
