@@ -24,7 +24,7 @@ $(document).ready(function() {
         'Chaj': 'Чай',
         'Bezalco': 'Безалкогольные коктейли',
         'alco': 'Алкогольные коктейли',
-        'Alco_1 1': 'Коктейли 1+1'
+        'Alco_1+1': 'Коктейли 1+1'
     };
 
     // Определение разделов для групп
@@ -78,7 +78,8 @@ $(document).ready(function() {
 
     // Загрузка карточек из одного раздела
     async function loadCardsFromSection(sectionName) {
-        const basePath = `images/${sectionName}/`;
+        // Путь относительно папки flashcards: images находится на уровень выше
+        const basePath = `../images/${sectionName}/`;
         const maxNum = await getMaxImageNumber(basePath);
         const sectionCards = [];
         for (let i = 1; i <= maxNum; i += 2) {
@@ -187,11 +188,11 @@ $(document).ready(function() {
         currentCardIndex = index;
         const card = cards[currentCardIndex];
 
-        // Скрываем карточку, чтобы избежать артефактов при смене
+        // Скрываем карточку
         $flashcard.hide();
         // Сбрасываем состояние переворота
         $flashcard.removeClass('flipped');
-        // Обновляем текст кнопок (на случай, если они были изменены)
+        // Обновляем текст кнопок
         $flipBtn.text('Посмотреть состав');
         $('#flipCard-mobile').text('Посмотреть состав');
 
@@ -199,8 +200,12 @@ $(document).ready(function() {
         $frontImg.attr('src', card.question);
         $backImg.attr('src', card.answer);
 
-        // После установки src показываем карточку
-        $flashcard.show();
+        // Ждём следующего кадра анимации, чтобы браузер успел применить изменения
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                $flashcard.show();
+            });
+        });
     }
 
     function flipCard() {
