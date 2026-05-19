@@ -3,6 +3,8 @@ $(document).ready(function() {
     const section = urlParams.get('section');
     const allMode = urlParams.get('all') === 'true';
     const group = urlParams.get('group');
+    const cardParam = urlParams.get('card'); // VIEW MODE: конкретная карточка из поиска
+    const viewMode = cardParam !== null;
 
     const sectionDisplayNames = {
         'zavtrak': 'Завтраки',
@@ -26,6 +28,227 @@ $(document).ready(function() {
         'Alco_1 1': 'Коктейли 1+1'
     };
 
+    // Card names: section -> imageIndex -> name
+    const CARD_NAMES = {
+        'zavtrak': {
+            1: 'Бульон с куриным филе',
+            3: 'Гречотто с трюфельными шампиньонами',
+            5: 'Овсянка с беконом',
+            7: 'Овсянка с цукатами из киви',
+            9: 'Омлет с салатом',
+            11: 'Омлет с салатом и курицей',
+            13: 'Омлет с салатом и беконом',
+            15: 'Омлет с салатом и лососем',
+            17: 'Сырники с творожно-манговым кремом и личи',
+            19: 'Блинчики с творогом и пюре манго с личи',
+            21: 'Скрэмбл с беконом и салатом',
+            23: 'Английский завтрак',
+            25: 'Беларуский завтрак',
+            27: 'Американский завтрак',
+            29: 'Сэндвич с говядиной'
+        },
+        'Detskoe': {
+            1: 'Бейбичино Персик',
+            3: 'Бейбичино Соленая карамель',
+            5: 'Коктейль молочный Обжора',
+            7: 'Сырники с творожно-манговым кремом и личи',
+            9: 'Нарисуй свой сырник',
+            11: 'Бульон с куриным филе',
+            13: 'Бургер с куриным бедром',
+            15: 'Пицца с сосисками и томатами',
+            17: 'Куриный биточек с картофельным пюре и овощами',
+            19: 'Пицца с ветчиной, курицей и ананасами',
+            21: 'Сосиски с картофельным пюре',
+            23: 'Лингвини с сыром',
+            25: 'Лингвини с ветчиной и курицей',
+            27: 'Картофель фри с наггетсами'
+        },
+        'Salaty': {
+            1: 'Греческий салат с рулетиками из цукини',
+            3: 'Цезарь с креветками',
+            5: 'Цезарь с курицей',
+            7: 'Цезарь с беконом и яйцом',
+            9: 'Теплый салат с ростбифом и сливочным сыром',
+            11: 'Сельдь без шубы',
+            13: 'Оливье с копченой курицей'
+        },
+        'Zacuski': {
+            1: 'Тартар из говядины',
+            3: 'Карпаччо из говядины',
+            5: 'Севиче из лосося с дальневосточным гребешком',
+            7: 'Сельдь с печеным картофелем и малиновым луком',
+            9: 'Риет из судака',
+            11: 'Мясное плато',
+            13: 'Картофель фри с наггетсами',
+            15: 'Запеченный Чеддер',
+            17: 'Пивной набор',
+            19: 'Жареные креветки с тайским айоли',
+            21: 'Крылышки в глазури Унаги и Свит Чили с кунжутом',
+            23: 'Мясная доска на компанию',
+            25: 'Гренки с балтийским соусом'
+        },
+        'Supy': {
+            1: 'Солянка GARAGE',
+            3: 'Грибной крем-суп с трюфельной пастой',
+            5: 'Борщ с говяжьими щечками',
+            7: 'Том ям с морепродуктами'
+        },
+        'Gor_bluda': {
+            1: 'Куриные биточки с картофельным пюре и грибным соусом',
+            3: 'Шницель из курицы с картофельными дольками и зеленым салатом',
+            5: 'Картофельная запеканка с говяжьими щечками в сливочном демигласе',
+            7: 'Рыбная котлета с пюре, икрой и соусом сливочный тайгермилк',
+            9: 'Рулька с картофелем и яйцом',
+            11: 'Ребрышки с мятым картофелем, соусом из хрена и опятами',
+            13: 'Рис в азиатском стиле с говядиной',
+            15: 'Рис в азиатском стиле с курицей',
+            17: 'Запеченная свинина в сливочном соусе',
+            19: 'Стейк из говядины с трюфельным пюре и огурцами кимчи',
+            21: 'Стейк из лосося с печеными овощами',
+            23: 'Утиное филе с пюре из корня сельдерея с ягодным конфи',
+            25: 'Вырезка из говядины с картофельными дольками и овощами',
+            27: 'Говяжьи щечки с трюфельным пюре'
+        },
+        'Draniki': {
+            1: 'Драники с куриным бедром и грибным соусом',
+            3: 'Драники с рулькой и яйцом',
+            5: 'Драники с беконом и сметаной',
+            7: 'Драники с лососем и зеленым соусом',
+            9: 'Драники с риетом из копченого судака'
+        },
+        'Pasta': {
+            1: 'Паста с цыпленком, грибами и трюфельным соусом',
+            3: 'Паста с беконом и сливочным соусом',
+            5: 'Паста с креветками, брокколи и сыром дорблю',
+            7: 'Паста с говядиной в азиатском стиле'
+        },
+        'Burgery_tostada': {
+            1: 'Тостада с говядиной',
+            3: 'Тостада с курицей',
+            5: 'Бургер с говядиной, огурцами кимчи и малиновой горчицей',
+            7: 'Бургер с куриным шницелем, беконом и соусом тартар'
+        },
+        'Pizza': {
+            1: 'Ветчина и грибы',
+            3: 'Баварская',
+            5: 'Гавайская с ананасами кимчи',
+            7: 'Пепперони',
+            9: 'Маргарита',
+            11: 'Барбекю',
+            13: 'Шеф-пицца',
+            15: 'Цезарь',
+            17: 'С говяжьими щечками',
+            19: 'Бонанза',
+            21: 'Вегетарианская',
+            23: 'Грибная с трюфельным медом',
+            25: 'GARAGE',
+            27: 'Чизбургер',
+            29: '5 сыров с трюфельным медом',
+            31: 'С креветкой и стружкой тунца',
+            33: '5 сыров с пепперони'
+        },
+        'Deserty': {
+            1: 'Фондан со сметанным соусом',
+            3: 'Сырники с творожно-манговым кремом и личи',
+            5: 'Баблс с ананасом',
+            7: 'Баблс с бананом'
+        },
+        '103BY': {
+            1: 'Смузи овсяный',
+            3: 'Омлет с салатом из свежих овощей',
+            5: 'Омлет с индейкой и салатом из свежих овощей',
+            7: 'Омлет с креветками и салатом из свежих овощей',
+            9: 'Йогурт с чиа и пюре манго',
+            11: 'Салат с ростбифом и картофельными дольками',
+            13: 'Куриные котлеты с гречкой и салатом',
+            15: 'Тальятта из индейки с овощами',
+            17: 'Поке с лососем'
+        },
+        'Sogr_napitki': {
+            1: 'Горячий бамбл',
+            3: 'Чай ягодный цитрус',
+            5: 'Апельсиновый тодди',
+            7: 'Какао малина-ваниль',
+            9: 'Раф апельсиновый пирог',
+            11: 'Глинтвейн безалкогольный',
+            13: 'Глинтвейн алкогольный'
+        },
+        'Firm_kofe': {
+            1: 'Бамбл кофе',
+            3: 'Латте персик-личи',
+            5: 'Эспрессо-тоник',
+            7: 'Латте орео',
+            9: 'Айс латте'
+        },
+        'Kakao_kofe_matcha': {
+            1: 'Эспрессо',
+            3: 'Американо',
+            5: 'Капучино',
+            7: 'Латте',
+            9: 'Раф',
+            11: 'Мокко',
+            13: 'Матча-капучино',
+            15: 'Какао классическое',
+            17: 'Флэт Уайт',
+            19: 'Халвичный раф',
+            21: 'Матча Юдзу-сода',
+            23: 'Матча Тоник'
+        },
+        'Chaj': {
+            1: 'Малиновый чай',
+            3: 'Чай Горячий цитрус',
+            5: 'Имбирный чай',
+            7: 'Чай Лесной с сосновыми шишками',
+            9: 'Облепиховый чай',
+            11: 'Чай Имбирь-юдзу'
+        },
+        'Bezalco': {
+            1: 'Bubble Tea Смузи',
+            3: 'Bubble Tea Вишня',
+            5: 'Bubble Tea Клубничный милкшейк',
+            7: 'Bubble Tea Малина-анчан',
+            9: 'Ванильный милкшейк',
+            11: 'Малиновый милкшейк',
+            13: 'Милкшейк Сникерс',
+            15: 'Милкшейк Орео',
+            17: 'Мохито классический',
+            19: 'Мохито Ягодный',
+            21: 'Мохито Маракуйя',
+            23: 'Лимонад Маракуйя-малина',
+            25: 'Лимонад Клубника-фейхоа',
+            27: 'Пина Колада NO ALCO'
+        },
+        'alco': {
+            1: 'Френч кофе (со льдом / теплый)',
+            3: 'Белый русский',
+            5: 'Эспрессо чиз (со льдом / теплый)',
+            7: 'Синяя линия',
+            9: 'Космо 2.0',
+            11: 'Сприц мейджик',
+            13: 'Бетон',
+            15: 'Мартини тоник',
+            17: 'Фиеро тоник',
+            19: 'Джин тоник',
+            21: 'Виски William Lawson\'s кола',
+            23: 'Мохито алко',
+            25: 'Куба Либре',
+            27: 'Тропикал Май Тай',
+            29: 'Лонг Айленд Айс Ти',
+            31: 'Пина Колада ALCO'
+        },
+        'Alco_1 1': {
+            1: 'Фейк Беллини',
+            3: 'Персиковая кайпироска',
+            5: 'Малиновый Джин Физ',
+            7: 'Ягодный Стронг Лонг',
+            9: 'Карибский трип',
+            11: 'Элбоу',
+            13: 'Лимонный шот',
+            15: 'Сливочно-мятный шот',
+            17: 'Ягодно-цитрусовый шот'
+        }
+    };
+
     const GROUPS = {
         dinner: ['Salaty', 'Zacuski', 'Supy', 'Gor_bluda', 'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty'],
         bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1']
@@ -41,23 +264,90 @@ $(document).ready(function() {
     let allCards = [];
     let learningCards = [];
     let currentCardIndex = 0;
+    let showNames = false;
+    let currentTitle = '';
 
     let isDragging = false;
     let startX = 0;
     let currentX = 0;
 
-    const $flashcard = $('.flashcard');
-    const $frontImg = $('#frontImg');
-    const $backImg = $('#backImg');
-    const $questionBtn = $('#question, #question-mobile');
-    const $flipBtn = $('#flipCard, #flipCard-mobile');
-    const $rememberBtn = $('#rememberBtn');
-    const $forgetBtn = $('#forgetBtn');
+    const $section      = $('.section');
+    const $flashcard    = $('.flashcard');
+    const $frontImg     = $('#frontImg');
+    const $backImg      = $('#backImg');
+    const $questionBtn  = $('#question, #question-mobile');
+    const $flipBtn      = $('#flipCard, #flipCard-mobile');
+    const $rememberBtn  = $('#rememberBtn');
+    const $forgetBtn    = $('#forgetBtn');
     const $progressInfo = $('#progressInfo');
     const $sectionTitle = $('#sectionTitle');
-    const $helpBtn = $('#helpBtn');
+    const $helpBtn      = $('#helpBtn');
+    const $cardName     = $('#cardName');
+    const $modeToggle   = $('#modeToggle');
+    const $viewModeBar  = $('#viewModeBar');
+    const $restartBtn   = $('#restartBtn');
 
-    // ========== МОДАЛЬНОЕ ОКНО ИНСТРУКЦИИ (обновлённый текст) ==========
+    // ========== VIEW MODE ==========
+    if (viewMode) {
+        $section.addClass('view-mode');
+        $viewModeBar.show();
+    }
+
+    // ========== MODE TOGGLE ==========
+    $modeToggle.on('click', function() {
+        showNames = !showNames;
+        if (showNames) {
+            $(this).addClass('active');
+            $(this).find('.mode-label').text('С названием');
+        } else {
+            $(this).removeClass('active');
+            $(this).find('.mode-label').text('Без названия');
+        }
+        updateCardName();
+    });
+
+    function getCurrentCardName() {
+        if (!learningCards.length) return '';
+        const card = learningCards[currentCardIndex];
+        if (!card) return '';
+        const sectionNames = CARD_NAMES[card.sectionName];
+        if (!sectionNames) return '';
+        return sectionNames[card.imgIndex] || '';
+    }
+
+    function updateCardName() {
+        // В режиме просмотра — название всегда показывается (управляется через CSS .view-mode)
+        // В режиме обучения — только когда showNames = true
+        if (viewMode) {
+            const name = getCurrentCardName();
+            $cardName.text(name || '').css('display', name ? 'block' : 'none');
+        } else if (showNames && learningCards.length) {
+            const name = getCurrentCardName();
+            $cardName.text(name || '').css('display', name ? 'block' : 'none');
+        } else {
+            $cardName.hide();
+        }
+    }
+
+    // ========== COMPLETION SCREEN ==========
+    function showCompletionScreen() {
+        $section.addClass('completion-state');
+        $sectionTitle.text('🎉 Все карточки выучены!');
+    }
+
+    function hideCompletionScreen() {
+        $section.removeClass('completion-state');
+        $sectionTitle.text(currentTitle);
+    }
+
+    $restartBtn.on('click', function() {
+        hideCompletionScreen();
+        initLearning();
+        $flashcard.show();
+        showCurrentCard();
+    });
+
+    // ========== MODAL ==========
     if (!$('.modal').length) {
         const modalHtml = `
             <div class="modal" id="instructionModal">
@@ -70,6 +360,7 @@ $(document).ready(function() {
                         👈 влево — если не запомнил (появится снова позже)</li>
                         <li><strong>Нажми на карточку</strong> или кнопку «Посмотреть состав», чтобы перевернуть её.</li>
                         <li><strong>Кнопка «Загадать блюдо»</strong> показывает случайную карточку (прогресс не меняется).</li>
+                        <li><strong>Переключатель названия</strong> показывает или скрывает название блюда поверх карточки.</li>
                         <li><strong>Вверху отображается</strong>, сколько карточек осталось выучить.</li>
                     </ul>
                 </div>
@@ -80,21 +371,20 @@ $(document).ready(function() {
 
     const $modal = $('#instructionModal');
     const $closeModal = $('.close-modal');
-
     $helpBtn.on('click', () => $modal.css('display', 'flex'));
     $closeModal.on('click', () => $modal.hide());
-    $(window).on('click', (e) => {
-        if (e.target === $modal[0]) $modal.hide();
-    });
+    $(window).on('click', (e) => { if (e.target === $modal[0]) $modal.hide(); });
 
-    // ========== ЗАГРУЗКА КАРТОЧЕК (оптимизированная) ==========
-    function checkImagePair(basePath, index) {
+    // ========== LOAD CARDS ==========
+    function checkImagePair(basePath, sectionName, index) {
         return new Promise(resolve => {
             const img = new Image();
             img.src = `${basePath}${index}.png`;
             img.onload = () => resolve({
                 question: `${basePath}${index}.png`,
-                answer: `${basePath}${index + 1}.png`
+                answer: `${basePath}${index + 1}.png`,
+                sectionName: sectionName,
+                imgIndex: index
             });
             img.onerror = () => resolve(null);
         });
@@ -104,18 +394,16 @@ $(document).ready(function() {
         const basePath = `../images/${sectionName}/`;
         const MAX = 100;
         const checks = [];
-        for (let i = 1; i <= MAX; i += 2) checks.push(checkImagePair(basePath, i));
+        for (let i = 1; i <= MAX; i += 2) checks.push(checkImagePair(basePath, sectionName, i));
         const results = await Promise.all(checks);
         return results.filter(Boolean);
     }
 
     async function loadCardsFromSections(sectionsList, title) {
+        currentTitle = title;
         $sectionTitle.text(`Загрузка ${title}...`);
         $flashcard.hide();
-        $questionBtn.prop('disabled', true);
-        $flipBtn.prop('disabled', true);
-        $rememberBtn.prop('disabled', true);
-        $forgetBtn.prop('disabled', true);
+        setButtonsDisabled(true);
 
         const promises = sectionsList.map(loadCardsFromSection);
         const results = await Promise.all(promises);
@@ -127,11 +415,7 @@ $(document).ready(function() {
         }
 
         $sectionTitle.text(title);
-        $questionBtn.prop('disabled', false);
-        $flipBtn.prop('disabled', false);
-        $rememberBtn.prop('disabled', false);
-        $forgetBtn.prop('disabled', false);
-
+        setButtonsDisabled(false);
         initLearning();
         $flashcard.show();
         showCurrentCard();
@@ -139,12 +423,10 @@ $(document).ready(function() {
 
     async function loadCardsForSection(sectionName) {
         const displayName = sectionDisplayNames[sectionName] || sectionName;
+        currentTitle = `Изучаем: ${displayName}`;
         $sectionTitle.text(`Загрузка раздела "${displayName}"...`);
         $flashcard.hide();
-        $questionBtn.prop('disabled', true);
-        $flipBtn.prop('disabled', true);
-        $rememberBtn.prop('disabled', true);
-        $forgetBtn.prop('disabled', true);
+        setButtonsDisabled(true);
 
         allCards = await loadCardsFromSection(sectionName);
 
@@ -153,15 +435,51 @@ $(document).ready(function() {
             return;
         }
 
-        $sectionTitle.text(`Изучаем раздел: ${displayName}`);
-        $questionBtn.prop('disabled', false);
-        $flipBtn.prop('disabled', false);
-        $rememberBtn.prop('disabled', false);
-        $forgetBtn.prop('disabled', false);
-
+        $sectionTitle.text(currentTitle);
+        setButtonsDisabled(false);
         initLearning();
         $flashcard.show();
         showCurrentCard();
+    }
+
+    // ========== VIEW MODE: загрузка одной карточки ==========
+    async function loadSingleCard(sectionName, cardIdx) {
+        const displayName = sectionDisplayNames[sectionName] || sectionName;
+        const cardName = (CARD_NAMES[sectionName] || {})[parseInt(cardIdx)] || '';
+        const title = cardName || displayName;
+
+        $sectionTitle.text(cardName ? cardName : `Загрузка...`);
+        $flashcard.hide();
+
+        const basePath = `../images/${sectionName}/`;
+        const idx = parseInt(cardIdx);
+
+        // Проверяем наличие изображений
+        const card = await checkImagePair(basePath, sectionName, idx);
+
+        if (!card) {
+            $sectionTitle.text(`Карточка не найдена`);
+            return;
+        }
+
+        allCards = [card];
+        learningCards = [card];
+        currentCardIndex = 0;
+
+        $sectionTitle.text(title);
+        $flashcard.show();
+
+        // Показываем карточку
+        $frontImg.attr('src', card.question);
+        $backImg.attr('src', card.answer);
+        updateCardName();
+    }
+
+    function setButtonsDisabled(disabled) {
+        $questionBtn.prop('disabled', disabled);
+        $flipBtn.prop('disabled', disabled);
+        $rememberBtn.prop('disabled', disabled);
+        $forgetBtn.prop('disabled', disabled);
     }
 
     function initLearning() {
@@ -184,23 +502,28 @@ $(document).ready(function() {
 
     function showCurrentCard() {
         if (!learningCards.length) {
-            $sectionTitle.text('🎉 Поздравляем! Вы выучили все карточки! 🎉');
             $flashcard.hide();
-            $questionBtn.prop('disabled', true);
-            $flipBtn.prop('disabled', true);
-            $rememberBtn.prop('disabled', true);
-            $forgetBtn.prop('disabled', true);
+            showCompletionScreen();
             return;
         }
 
         const card = learningCards[currentCardIndex];
+
+        // Убедимся, что карточка всегда показывается со стороны ВОПРОСА
+        // (сброс без анимации, если нужно)
         if ($flashcard.hasClass('flipped')) {
+            const $inner = $flashcard.find('.flashcard-inner');
+            $inner.css('transition', 'none');
             $flashcard.removeClass('flipped');
-            $flipBtn.text('Посмотреть состав');
-            $('#flipCard-mobile').text('Посмотреть состав');
+            $flashcard[0].offsetHeight; // принудительный reflow
+            $inner.css('transition', '');
         }
+
+        $flipBtn.text('Посмотреть состав');
+        $('#flipCard-mobile').text('Посмотреть состав');
         $frontImg.attr('src', card.question);
         $backImg.attr('src', card.answer);
+        updateCardName();
     }
 
     function showRandomCard() {
@@ -212,15 +535,12 @@ $(document).ready(function() {
         showCurrentCard();
     }
 
-    // ========== ДЕЙСТВИЯ С КАРТОЧКАМИ ==========
+    // ========== ACTIONS ==========
     function markKnown() {
         if (!learningCards.length) return;
         learningCards.splice(currentCardIndex, 1);
         updateProgressInfo();
-        if (!learningCards.length) {
-            showCurrentCard();
-            return;
-        }
+        if (!learningCards.length) { showCurrentCard(); return; }
         if (currentCardIndex >= learningCards.length) currentCardIndex = 0;
         animateSwipe('right');
     }
@@ -235,18 +555,31 @@ $(document).ready(function() {
     }
 
     function animateSwipe(direction) {
+        // FIX: Мгновенно переворачиваем карточку на сторону вопроса (без анимации переворота),
+        // чтобы следующая карточка всегда вылетала со стороны вопроса.
+        const $inner = $flashcard.find('.flashcard-inner');
+        if ($flashcard.hasClass('flipped')) {
+            $inner.css('transition', 'none');
+            $flashcard.removeClass('flipped');
+            $flashcard[0].offsetHeight; // принудительный reflow
+            $inner.css('transition', '');
+        }
+
+        $flipBtn.text('Посмотреть состав');
+        $('#flipCard-mobile').text('Посмотреть состав');
+
         const className = direction === 'right' ? 'swipe-right' : 'swipe-left';
         $flashcard.addClass(className);
         setTimeout(() => {
             $flashcard.removeClass(className);
             $flashcard.removeClass('like dislike');
             showCurrentCard();
-        }, 300);
+        }, 350);
     }
 
-    // ========== СВАЙП ==========
+    // ========== SWIPE ==========
     $flashcard.on('mousedown touchstart', function(e) {
-        if (!learningCards.length) return;
+        if (!learningCards.length || viewMode) return;
         isDragging = true;
         startX = e.pageX || e.originalEvent.touches[0].pageX;
         currentX = startX;
@@ -279,8 +612,9 @@ $(document).ready(function() {
         }
     });
 
-    // ========== КНОПКИ ==========
+    // ========== BUTTONS ==========
     $questionBtn.on('click', showRandomCard);
+
     $flipBtn.on('click', function() {
         if ($flashcard.is(':visible')) {
             $flashcard.toggleClass('flipped');
@@ -289,19 +623,24 @@ $(document).ready(function() {
             $('#flipCard-mobile').text(text);
         }
     });
+
     $flashcard.on('click', function() {
-        if ($flashcard.is(':visible')) {
+        if ($flashcard.is(':visible') && !isDragging) {
             $flashcard.toggleClass('flipped');
             const text = $flashcard.hasClass('flipped') ? 'Посмотреть фото' : 'Посмотреть состав';
             $flipBtn.text(text);
             $('#flipCard-mobile').text(text);
         }
     });
+
     $rememberBtn.on('click', markKnown);
     $forgetBtn.on('click', markUnknown);
 
-    // ========== ЗАПУСК ==========
-    if (allMode) {
+    // ========== INIT ==========
+    if (viewMode && section) {
+        // РЕЖИМ ПРОСМОТРА: одна конкретная карточка из поиска
+        loadSingleCard(section, cardParam);
+    } else if (allMode) {
         loadCardsFromSections(ALL_SECTIONS, 'Все разделы меню');
     } else if (group && GROUPS[group]) {
         let title = group === 'dinner' ? 'Ужин (все блюда)' : 'Бар (все напитки)';
@@ -311,9 +650,6 @@ $(document).ready(function() {
     } else {
         $sectionTitle.text('Выберите раздел в меню');
         $flashcard.hide();
-        $questionBtn.prop('disabled', true);
-        $flipBtn.prop('disabled', true);
-        $rememberBtn.prop('disabled', true);
-        $forgetBtn.prop('disabled', true);
+        setButtonsDisabled(true);
     }
 });
