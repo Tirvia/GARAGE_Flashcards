@@ -421,6 +421,11 @@
             max-height:400px;
             display:block;
             border-radius:12px;
+            background:#0a0a0a;
+        }
+
+        .card-img.is-loading {
+            opacity:0;
         }
 
         /* Flip button (shared) */
@@ -567,7 +572,8 @@
 
         /* ===== MOBILE ===== */
         @media (max-width:480px) {
-            .content-area { padding:14px 12px 60px; }
+            .content-area { padding:14px 22px 60px 12px; }
+            .results-grid { gap:12px; }
             .tag-btn { padding:5px 10px; gap:4px; }
             .tag-emoji { font-size:0.95rem; }
             .tag-label { font-size:0.72rem; }
@@ -872,6 +878,7 @@ let activeTag = null;
 let activeMatches = [];
 let isBrowseFlipped = false;
 let isLearnFlipped = false;
+let browseLoadToken = 0;
 
 // Learning state
 let learnCards = [];
@@ -960,7 +967,25 @@ function showResults() {
 }
 
 // ===== BROWSE CARD =====
-function openBrowseCard(s, i, n) {
+function preloadImg(src) {
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = src;
+    });
+}
+
+function clearBrowseImages() {
+    cardFrontBrowse.classList.add('is-loading');
+    cardBackBrowse.classList.add('is-loading');
+    cardFrontBrowse.removeAttribute('src');
+    cardBackBrowse.removeAttribute('src');
+}
+
+async function openBrowseCard(s, i, n) {
+    const token = ++browseLoadToken;
+
     isBrowseFlipped = false;
     flipInnerBrowse.style.transition = 'none';
     flipContainerBrowse.classList.remove('flipped');
@@ -969,15 +994,27 @@ function openBrowseCard(s, i, n) {
     flipTextBrowse.textContent = 'Посмотреть состав';
 
     const dish = ALL.find(d => d.s === s && d.i === i && d.n === n);
+    const frontSrc = `images/${s}/${i}.png`;
+    const backSrc  = `images/${s}/${i + 1}.png`;
+
+    // Сначала очищаем старые изображения, чтобы при переходе не мелькала предыдущая карточка.
+    clearBrowseImages();
 
     flipNameBrowse.textContent = n;
     cvCardTags.textContent = dish ? dish.t.map(tag => TAG_EMOJI[tag] || '').join('') + (dish.kb ? ' (на кур.бульоне)' : '') : '';
     cvSectionLabel.textContent = SECS[s] || s;
-    cardFrontBrowse.src = `images/${s}/${i}.png`;
-    cardBackBrowse.src  = `images/${s}/${i + 1}.png`;
 
     showState('card-view');
     window.scrollTo({ top:0, behavior:'smooth' });
+
+    // Дожидаемся загрузки новой пары картинок и применяем только актуальный запрос.
+    await Promise.all([preloadImg(frontSrc), preloadImg(backSrc)]);
+    if (token !== browseLoadToken) return;
+
+    cardFrontBrowse.src = frontSrc;
+    cardBackBrowse.src  = backSrc;
+    cardFrontBrowse.classList.remove('is-loading');
+    cardBackBrowse.classList.remove('is-loading');
 }
 
 function setBrowseFlip(flipped) {
@@ -1168,19 +1205,59 @@ function onMouseUp() {
     setTimeout(() => { isDragging = false; }, 50);
 }
 
-// ===== RESULTS GRID CLICK =====
+// ===== RESULTS GRID TAP / SCROLL =====
+// На мобильных touchend срабатывал даже после прокрутки списка — из-за этого
+// при скролле случайно открывались карточки. Теперь карточка открывается только
+// если это был короткий тап без заметного движения пальца.
+let resultsTouchTarget = null;
+let resultsTouchStartX = 0;
+let resultsTouchStartY = 0;
+let resultsTouchMoved = false;
+let suppressResultsClickUntil = 0;
+
+function openDishCardElement(card) {
+    openBrowseCard(card.dataset.s, parseInt(card.dataset.i), card.dataset.n);
+}
+
 resultsGrid.addEventListener('click', e => {
+    if (Date.now() < suppressResultsClickUntil) return;
     const card = e.target.closest('.dish-card');
     if (!card) return;
-    openBrowseCard(card.dataset.s, parseInt(card.dataset.i), card.dataset.n);
+    openDishCardElement(card);
 });
 
-resultsGrid.addEventListener('touchend', e => {
+resultsGrid.addEventListener('touchstart', e => {
     const card = e.target.closest('.dish-card');
-    if (!card) return;
+    resultsTouchTarget = card;
+    resultsTouchMoved = false;
+    if (!card || !e.touches.length) return;
+    resultsTouchStartX = e.touches[0].pageX;
+    resultsTouchStartY = e.touches[0].pageY;
+}, { passive:true });
+
+resultsGrid.addEventListener('touchmove', e => {
+    if (!resultsTouchTarget || !e.touches.length) return;
+    const dx = Math.abs(e.touches[0].pageX - resultsTouchStartX);
+    const dy = Math.abs(e.touches[0].pageY - resultsTouchStartY);
+    if (dx > 10 || dy > 10) resultsTouchMoved = true;
+}, { passive:true });
+
+resultsGrid.addEventListener('touchend', e => {
+    if (!resultsTouchTarget) return;
+    const card = resultsTouchTarget;
+    resultsTouchTarget = null;
+
+    if (resultsTouchMoved) return;
+
     e.preventDefault();
-    openBrowseCard(card.dataset.s, parseInt(card.dataset.i), card.dataset.n);
+    suppressResultsClickUntil = Date.now() + 500;
+    openDishCardElement(card);
 }, { passive:false });
+
+resultsGrid.addEventListener('touchcancel', () => {
+    resultsTouchTarget = null;
+    resultsTouchMoved = false;
+});
 
 // ===== INIT =====
 showState('prompt');
