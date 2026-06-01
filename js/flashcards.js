@@ -25,7 +25,8 @@ $(document).ready(function() {
         'Chaj': 'Чай',
         'Bezalco': 'Безалкогольные коктейли',
         'alco': 'Алкогольные коктейли',
-        'Alco_1 1': 'Коктейли 1+1'
+        'Alco_1 1': 'Коктейли 1+1',
+        'limonady': 'Лимонады'
     };
 
     // Card names: section -> imageIndex -> name
@@ -71,6 +72,14 @@ $(document).ready(function() {
             9: 'Теплый салат с ростбифом и сливочным сыром',
             11: 'Сельдь без шубы',
             13: 'Оливье с копченой курицей'
+        },
+          'limonady': {
+            1: 'Айс Ти грейпрфрут-лаванда',
+            3: 'Айс Ти смородина-черемуха',
+            5: 'Лимонад ананас-личи',
+            7: 'Лимонад грейпфрут-лаванда',
+            9: 'Лимонад Цветочный',
+          
         },
         'Zacuski': {
             1: 'Тартар из говядины',
@@ -250,14 +259,14 @@ $(document).ready(function() {
 
     const GROUPS = {
         dinner: ['Salaty', 'Zacuski', 'Supy', 'Gor_bluda', 'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty'],
-        bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1']
+        bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1', 'limonady']
     };
 
     const ALL_SECTIONS = [
         'zavtrak', 'Detskoe', 'Salaty', 'Zacuski', 'Supy', 'Gor_bluda',
         'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty', '103BY',
         'Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco',
-        'alco', 'Alco_1 1'
+        'alco', 'Alco_1 1', 'limonady'
     ];
 
     let allCards = [];
