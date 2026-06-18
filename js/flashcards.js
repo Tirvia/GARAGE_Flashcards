@@ -26,7 +26,8 @@ $(document).ready(function() {
         'Bezalco': 'Безалкогольные коктейли',
         'alco': 'Алкогольные коктейли',
         'Alco_1 1': 'Коктейли 1+1',
-        'limonady': 'Лимонады'
+        'limonady': 'Лимонады'        ,
+        'sezonnoe': 'Сезонное'
     };
 
     // Card names: section -> imageIndex -> name
@@ -255,6 +256,15 @@ $(document).ready(function() {
             13: 'Лимонный шот',
             15: 'Сливочно-мятный шот',
             17: 'Ягодно-цитрусовый шот'
+        },
+        'sezonnoe': {
+            1: 'ChocoLATTE',
+            3: 'Сердце Кракена',
+            5: 'Цветочный Сприц',
+            7: 'Крем-холодник с овощами',
+            9: 'Осьминог с пюре из сельдерея и соусом Тайгермилк,
+            11: 'Салат с осьминогом и медово-горчичной заправкой',
+            13: 'Улитки с Пармезаном'
         }
     };
 
@@ -267,7 +277,7 @@ $(document).ready(function() {
         'zavtrak', 'Detskoe', 'Salaty', 'Zacuski', 'Supy', 'Gor_bluda',
         'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty', '103BY',
         'Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco',
-        'alco', 'Alco_1 1', 'limonady'
+        'alco', 'Alco_1 1', 'limonady', 'sezonnoe'
     ];
 
     let allCards = [];
