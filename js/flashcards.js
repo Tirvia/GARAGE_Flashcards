@@ -18,7 +18,7 @@ $(document).ready(function() {
         'Burgery_tostada': 'Бургеры и тостада',
         'Pizza': 'Пицца',
         'Deserty': 'Десерты',
-        '103BY': '103.BY',
+        '103BY': 'Меню состояний',
         'Sogr_napitki': 'Согревающие напитки',
         'Firm_kofe': 'Фирменный кофе',
         'Kakao_kofe_matcha': 'Какао, кофе, матча',
