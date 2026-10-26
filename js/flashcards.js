@@ -26,7 +26,7 @@ $(document).ready(function() {
         'Bezalco': 'Безалкогольные коктейли',
         'alco': 'Алкогольные коктейли',
         'Alco_1 1': 'Коктейли 1+1',
-        'limonady': 'Лимонады'        ,
+   
         'sezonnoe': 'Сезонное'
     };
 
@@ -74,14 +74,7 @@ $(document).ready(function() {
             11: 'Зеленый салат с соусом Ростбиф',
             13: 'Оливье с копченой курицей'
         },
-          'limonady': {
-            1: 'Айс Ти грейпрфрут-лаванда',
-            3: 'Айс Ти смородина-черемуха',
-            5: 'Лимонад ананас-личи',
-            7: 'Лимонад грейпфрут-лаванда',
-            9: 'Лимонад Цветочный',
           
-        },
         'Zacuski': {
             1: 'Тартар из говядины',
             3: 'Карпаччо из говядины',
@@ -280,14 +273,14 @@ $(document).ready(function() {
 
     const GROUPS = {
         dinner: ['Salaty', 'Zacuski', 'Supy', 'Gor_bluda', 'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty'],
-        bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1', 'limonady']
+        bar: ['Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco', 'alco', 'Alco_1 1']
     };
 
     const ALL_SECTIONS = [
         'zavtrak', 'Detskoe', 'Salaty', 'Zacuski', 'Supy', 'Gor_bluda',
         'Draniki', 'Pasta', 'Burgery_tostada', 'Pizza', 'Deserty', '103BY',
         'Sogr_napitki', 'Firm_kofe', 'Kakao_kofe_matcha', 'Chaj', 'Bezalco',
-        'alco', 'Alco_1 1', 'limonady', 'sezonnoe'
+        'alco', 'Alco_1 1',  'sezonnoe'
     ];
 
     let allCards = [];
